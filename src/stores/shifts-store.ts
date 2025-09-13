@@ -27,9 +27,6 @@ class ShiftsStore implements IShiftsStore {
     this.error = null;
     try {
       const data = await fetchShifts(lat, lon);
-      // const data = await fetchShifts(55.991349, 37.834919);
-
-      console.log('Все гуд!', data)
   
       runInAction(() => {
         this.shifts = Array.isArray(data) ? data : [];
