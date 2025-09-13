@@ -17,6 +17,9 @@ import { useShifts } from '../../context/shifts-context';
 import { ITEM_HEIGHT } from './home-screen.constants';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/root-stack-param';
+import ItemSeparator from '../../components/list-separator/list-separator';
+import { styles } from './home-screen.styles';
+import { TEXTS } from '../../constants/texts';
 
 const ShiftListScreen: React.FC = observer(() => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
@@ -27,38 +30,39 @@ const ShiftListScreen: React.FC = observer(() => {
     try {
       const { lat, lon } = await requestAndGetLocation();
       await shiftsStore.loadShifts(lat, lon);
-      console.log(lat, lon, 'position');
-      console.log('after load shifts');
     } catch (e: any) {
       console.error('Location/load error:', e?.message ?? e);
     }
   }, [shiftsStore]);
 
-  /*  */
   useEffect(() => {
     handleLoadData();
   }, [handleLoadData, shiftsStore]);
 
+  const renderListHeader = () => <View style={styles.listHeader}><Text style={styles.listHeaderText}>{TEXTS.LIST_TITLE}</Text></View>;
+
   if (shiftsStore.loading) {
-    return <ActivityIndicator style={{ flex: 1 }} />;
+    return <ActivityIndicator size={'large'} style={[styles.mainInfoContainer, styles.mainContainerBackground]} />;
   }
 
   if (shiftsStore.error) {
     return (
-      <SafeAreaView style={{}}>
-        <Text>{shiftsStore.error}</Text>
-      </SafeAreaView>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{shiftsStore.error}</Text>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{}}>
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={validatedShifts}
         keyExtractor={item => `${item.id} + ${item.companyName}`}
-        ItemSeparatorComponent={() => (
-          <View style={{ height: 1, backgroundColor: '#eee' }} />
-        )}
+        ListHeaderComponent={renderListHeader}
+        ItemSeparatorComponent={ItemSeparator}
+        initialNumToRender={20}
+        maxToRenderPerBatch={10}
+        windowSize={21}
         getItemLayout={(_data, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
@@ -66,12 +70,7 @@ const ShiftListScreen: React.FC = observer(() => {
         })}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={{
-              padding: 12,
-              borderBottomWidth: 1,
-              borderColor: '#eee',
-              flexDirection: 'row',
-            }}
+            style={styles.shift}
             onPress={() =>
               navigation.navigate(NAVIGATION.DETAILS, { id: item.id })
             }
@@ -79,25 +78,20 @@ const ShiftListScreen: React.FC = observer(() => {
             {item.logo ? (
               <Image
                 source={{ uri: item.logo }}
-                style={{
-                  width: 60,
-                  height: 60,
-                  marginRight: 12,
-                  borderRadius: 6,
-                }}
+                style={styles.image}
               />
             ) : null}
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: '600' }}>{item.companyName}</Text>
+            <View style={styles.mainInfoContainer}>
+              <Text style={styles.companyName}>{item.companyName}</Text>
               <Text>{item.address}</Text>
               <Text>
-                {item.dateStartByCity} — {item.timeStartByCity}–
+                {item.dateStartByCity} {TEXTS.DASH} {item.timeStartByCity}{TEXTS.DASH}
                 {item.timeEndByCity}
               </Text>
-              <Text>{item.priceWorker ? `${item.priceWorker} р` : ''}</Text>
+              <Text>{item.priceWorker ? `${item.priceWorker} ${TEXTS.RUB}` : ''}</Text>
               <Text>
-                {item.currentWorkers}/{item.planWorkers} ·{' '}
-                {item.customerRating ?? '-'} ⭐ (
+                {item.currentWorkers}/{item.planWorkers} ·
+                {item.customerRating ?? TEXTS.DASH} ⭐ (
                 {item.customerFeedbacksCount ?? 0})
               </Text>
             </View>

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-    itemSeparator: { height: 18 },
+    itemSeparator: { height: 2 },
 });

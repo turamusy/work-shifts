@@ -1,4 +1,3 @@
-
 export interface IShift {
   id: string | number;
   logo?: string;
@@ -9,14 +8,16 @@ export interface IShift {
   timeEndByCity?: string;
   currentWorkers?: number;
   planWorkers?: number;
-  workTypes?: {
-    id: number;
-    name: string;
-    nameGt5?: string;
-    nameLt5?: string;
-    nameOne?: string;
-  }[];
+  workTypes?: WorkType[];
   priceWorker?: number;
   customerFeedbacksCount?: number;
   customerRating?: number;
-};
+}
+
+export interface WorkType {
+  id: number;
+  name: string;
+  nameGt5?: string;
+  nameLt5?: string;
+  nameOne?: string;
+}
